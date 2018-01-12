@@ -7,7 +7,10 @@ import (
 
 var currentId int
 
+type Objects []interface{}
+
 var people People
+var objects Objects
 
 // Create Some Default People At Init
 func init() {

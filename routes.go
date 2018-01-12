@@ -36,4 +36,16 @@ var routes = Routes{
 		"/people",
 		PersonCreate,
 	},
+	Route{
+		"GenericJSON",
+		"POST",
+		"/JSON",
+		GenericJSON,
+	},
+	Route{
+		"GenericListJSON",
+		"GET",
+		"/JSON",
+		GenericListJSON,
+	},
 }

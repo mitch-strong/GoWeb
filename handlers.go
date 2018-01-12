@@ -85,6 +85,14 @@ func PersonListJSON(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
+func GenericListJSON(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "application/json; charset=UTF-8")
+	w.WriteHeader(http.StatusOK)
+	if err := json.NewEncoder(w).Encode(objects); err != nil {
+		panic(err)
+	}
+}
+
 func PersonCreate(w http.ResponseWriter, r *http.Request) {
 	var person Person
 	body, err := ioutil.ReadAll(io.LimitReader(r.Body, 1048576))
@@ -108,4 +116,44 @@ func PersonCreate(w http.ResponseWriter, r *http.Request) {
 	if err := json.NewEncoder(w).Encode(t); err != nil {
 		panic(err)
 	}
+}
+
+func GenericJSON(w http.ResponseWriter, r *http.Request) {
+	var f interface{}
+	body, err := ioutil.ReadAll(io.LimitReader(r.Body, 1048576))
+	if err != nil {
+		panic(err)
+	}
+	if err := r.Body.Close(); err != nil {
+		panic(err)
+	}
+	if err := json.Unmarshal(body, &f); err != nil {
+		w.Header().Set("Content-Type", "application/json; charset=UTF-8")
+		w.WriteHeader(422)
+		if err := json.NewEncoder(w).Encode(err); err != nil {
+			panic(err)
+		}
+	}
+
+	m := f.(map[string]interface{})
+	objects = append(objects, m)
+
+	for k, v := range m {
+		switch vv := v.(type) {
+		case string:
+			fmt.Println(k, "is string", vv)
+		case float64:
+			fmt.Println(k, "is float64", vv)
+		case []interface{}:
+			fmt.Println(k, "is an array:")
+			for i, u := range vv {
+				fmt.Println(i, u)
+			}
+		default:
+			fmt.Println(k, "is of a type I don't know how to handle")
+		}
+	}
+
+	w.Header().Set("Content-Type", "application/json; charset=UTF-8")
+	w.WriteHeader(http.StatusCreated)
 }
