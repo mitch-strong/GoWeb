@@ -1,40 +1,44 @@
 package main
 
-import "fmt"
+import (
+	"fmt"
+	"time"
+)
 
 var currentId int
 
-var todos Todos
+var people People
 
-// Give us some seed data
+// Create Some Default People At Init
 func init() {
-	RepoCreateTodo(Todo{Name: "Write presentation"})
-	RepoCreateTodo(Todo{Name: "Host meetup"})
+	RepoCreatePerson(Person{FirstName: "Mitchell", LastName: "Strong", IsUHN: true})
+	RepoCreatePerson(Person{FirstName: "Richard", LastName: "de Borja", IsUHN: true})
 }
 
-func RepoFindTodo(id int) Todo {
-	for _, t := range todos {
-		if t.Id == id {
+func RepoFindPerson(id int) Person {
+	for _, t := range people {
+		if t.ID == id {
 			return t
 		}
 	}
-	// return empty Todo if not found
-	return Todo{}
+	// return empty Person if not found
+	return Person{}
 }
 
-func RepoCreateTodo(t Todo) Todo {
-	currentId += 1
-	t.Id = currentId
-	todos = append(todos, t)
+func RepoCreatePerson(t Person) Person {
+	currentId++
+	t.ID = currentId
+	t.AddedOn = time.Now()
+	people = append(people, t)
 	return t
 }
 
-func RepoDestroyTodo(id int) error {
-	for i, t := range todos {
-		if t.Id == id {
-			todos = append(todos[:i], todos[i+1:]...)
+func RepoDestroyPerson(id int) error {
+	for i, t := range people {
+		if t.ID == id {
+			people = append(people[:i], people[i+1:]...)
 			return nil
 		}
 	}
-	return fmt.Errorf("Could not find Todo with id of %d to delete", id)
+	return fmt.Errorf("Could not find Person with id of %d to delete", id)
 }

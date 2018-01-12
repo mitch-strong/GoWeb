@@ -19,15 +19,21 @@ var routes = Routes{
 		Index,
 	},
 	Route{
-		"TodoIndex",
+		"PersonList",
 		"GET",
-		"/todos",
-		TodoIndex,
+		"/people",
+		PersonList,
 	},
 	Route{
-		"TodoCreate",
+		"PersonListJSON",
+		"GET",
+		"/JSONpeople",
+		PersonListJSON,
+	},
+	Route{
+		"PersonCreate",
 		"POST",
-		"/todos",
-		TodoCreate,
+		"/people",
+		PersonCreate,
 	},
 }
