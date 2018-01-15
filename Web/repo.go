@@ -11,6 +11,7 @@ type Objects []interface{}
 
 var people People
 var objects Objects
+var tests Tests
 
 // Create Some Default People At Init
 func init() {

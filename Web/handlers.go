@@ -23,6 +23,7 @@ func Index(w http.ResponseWriter, r *http.Request) {
 		<p>Please Note the Following Pages to Access</p>
 		<ul>
 			<li>GET --> "/" | Home Page</li>
+			<li>GET --> "/tests" | Unit Test Results</li>
 			<li>GET --> "/peopleJSON" | Shows list of people as JSON strings</li>
 			<li>GET --> "/people" | Shows list of people readable table</li>
 			<li>GET --> "/JSON" | Shows list of JSON objects as JSON strings</li>
@@ -94,6 +95,48 @@ func GenericListJSON(w http.ResponseWriter, r *http.Request) {
 	if err := json.NewEncoder(w).Encode(objects); err != nil {
 		panic(err)
 	}
+}
+
+func GetTestResults(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "text/html; charset=utf-8")
+
+	const tpl = `
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="UTF-8">
+		<title>{{.Title}}</title>
+	</head>
+	<body>
+	<h1>Unit Test Results</h1>
+	<table>
+	<tr><th>Test</th><th>Status</th></tr>
+		{{range .TestList}}<tr><td>{{ .Name }}</td><td>{{ .Status }}</td></div>{{end}}
+	</table>
+	</body>
+</html>`
+
+	check := func(err error) {
+		if err != nil {
+			log.Fatal(err)
+		}
+	}
+	t, err := template.New("webpage").Parse(tpl)
+	check(err)
+
+	data := struct {
+		Title    string
+		TestList []Test
+	}{
+		Title:    "Test Results",
+		TestList: tests,
+	}
+	err = t.Execute(w, data)
+	//err = t.Execute(os.Stdout, data)
+	check(err)
+
+	//fmt.Fprint(w, t)
+	return
 }
 
 func PersonCreate(w http.ResponseWriter, r *http.Request) {

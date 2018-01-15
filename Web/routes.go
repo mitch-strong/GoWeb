@@ -48,4 +48,10 @@ var routes = Routes{
 		"/JSON",
 		GenericListJSON,
 	},
+	Route{
+		"GetTestResults",
+		"GET",
+		"/tests",
+		GetTestResults,
+	},
 }
