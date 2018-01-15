@@ -27,7 +27,7 @@ var routes = Routes{
 	Route{
 		"PersonListJSON",
 		"GET",
-		"/JSONpeople",
+		"/peopleJSON",
 		PersonListJSON,
 	},
 	Route{
