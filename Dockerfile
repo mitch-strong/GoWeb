@@ -1,6 +1,20 @@
-FROM golang:1.8
-WORKDIR /Users/coop4/Mitchell/GoWebServerProject
-RUN go get -v github.com/mitch-strong/GoWeb 
-RUN go build -o main .
+FROM golang
+
+ARG app_env
+ENV APP_ENV $app_env
+
+COPY ./app /go/src/github.com/mitch-strong/GoWeb/Web
+WORKDIR /go/src/github.com/mitch-strong/GoWeb/Web
+
+RUN go get ./
+RUN go build
+
+CMD if [ ${APP_ENV} = production ]; \
+	then \
+	app; \
+	else \
+	go get github.com/pilu/fresh && \
+	fresh; \
+	fi
+	
 EXPOSE 8080
-CMD ["/main"]

@@ -6,3 +6,5 @@
 - Add go get functionality 
 - Make docker image on local and run it
 - Minikube / kuberneties docker launch
+- Rename all web routes to make more sence
+- Update main page to include new API options
