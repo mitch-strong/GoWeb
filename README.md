@@ -9,7 +9,7 @@ Simple Golang Web Server
 ```
 ## Docker 
 ```
-4. docker run -it --name=GoWeb -p 8080:8080 -v /Users/coop4/Mitchell/gogettest/app  $(docker images -q goweb)
+4. docker run -it --name=GoWeb -p 8080:8080 -v $HOME/go/src/github.com/mitch-strong/GoWeb/Web  $(docker images -q goweb)
 ```
 ## Minikube
 ```
@@ -19,6 +19,18 @@ Simple Golang Web Server
 7. kubectl run goweb --image=goweb:latest --port=8080 
 8. kubectl expose deployment goweb --type=LoadBalancer
 9. minikube service goweb
-10. Change "imagePullPolicy": "IfNotPresent", in YAML file in dashboard
 ```
 rm -rf ~/.minikube  - Run this if minikube starts with error
+docker login --username=yourhubusername
+
+NOTE:  Ended up logging into docker and pushing image onto repo, then using that image instead.  Hosts no problem
+docker login --username=yourhubusername
+docker push mitchellstrong/goweb:latest
+```
+4. minikube start
+5. kubectl config use-context minikube
+6. minikube dashboard
+7. kubectl run goweb --image=docker.io/mitchellstrong/goweb:latest --port=8080 
+8. kubectl expose deployment goweb --type=LoadBalancer
+9. minikube service goweb
+```
