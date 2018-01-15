@@ -19,5 +19,6 @@ Simple Golang Web Server
 7. kubectl run goweb --image=goweb:latest --port=8080 
 8. kubectl expose deployment goweb --type=LoadBalancer
 9. minikube service goweb
+10. Change "imagePullPolicy": "IfNotPresent", in YAML file in dashboard
 ```
 rm -rf ~/.minikube  - Run this if minikube starts with error
