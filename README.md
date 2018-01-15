@@ -20,12 +20,16 @@ Simple Golang Web Server
 8. kubectl expose deployment goweb --type=LoadBalancer
 9. minikube service goweb
 ```
-rm -rf ~/.minikube  - Run this if minikube starts with error
-docker login --username=yourhubusername
+```
+rm -rf ~/.minikube  //Run this if minikube starts with error
+```
 
 NOTE:  Ended up logging into docker and pushing image onto repo, then using that image instead.  Hosts no problem
+```
 docker login --username=yourhubusername
 docker push mitchellstrong/goweb:latest
+```
+## Minikube Docker Repo
 ```
 4. minikube start
 5. kubectl config use-context minikube
