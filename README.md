@@ -1,17 +1,17 @@
 # GoWeb
 Simple Golang Web Server
 
-# How To Install and Run
+## How To Install and Run
 ```
 1. go get -u github.com/mitch-strong/GoWeb/Web
 2. cd $HOME/go/src/github.com/mitch-strong/GoWeb
 3. docker build -t goweb ./
 ```
-# Docker 
+## Docker 
 ```
 4. docker run -it --name=GoWeb -p 8080:8080 -v /Users/coop4/Mitchell/gogettest/app  $(docker images -q goweb)
 ```
-# Minikube
+## Minikube
 ```
 4. minikube start
 5. kubectl config use-context minikube
