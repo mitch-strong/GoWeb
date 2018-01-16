@@ -15,63 +15,54 @@ func runUnitTests() {
 	log.Printf("////////////////////////////////////////////////////////")
 	log.Printf("Beginning to run tests")
 	x := PassFail(testUsersAdded())
-	//log.Printf("Testing: Default Users Added - %v", x)
 	test := Test{
 		Name:   "Default Users Added",
 		Status: x,
 	}
 	tests = append(tests, test)
 	x = PassFail(AddNewUserPOST())
-	//log.Printf("Testing: Adding User By JSON POST - %v", PassFail(AddNewUserPOST()))
 	test = Test{
 		Name:   "Adding User By JSON POST",
 		Status: x,
 	}
 	tests = append(tests, test)
 	x = PassFail(DeleteUser(3))
-	//log.Printf("Testing: Deleting New User - %v", PassFail(DeleteUser(3)))
 	test = Test{
 		Name:   "Deleting New User",
 		Status: x,
 	}
 	tests = append(tests, test)
 	x = PassFail(CheckPageResponse("http://localhost:8080/"))
-	//log.Printf("Testing: Check if '/' Page Works - %v", PassFail(CheckPageResponse("http://localhost:8080/")))
 	test = Test{
 		Name:   "Check if '/' Page Works",
 		Status: x,
 	}
 	tests = append(tests, test)
 	x = PassFail(CheckPageResponse("http://localhost:8080/people"))
-	//	log.Printf("Testing: Check if '/person' Page Works - %v", PassFail(CheckPageResponse("http://localhost:8080/people")))
 	test = Test{
 		Name:   "Check if '/person' Page Works",
 		Status: x,
 	}
 	tests = append(tests, test)
 	x = PassFail(CheckPageResponse("http://localhost:8080/peopleJSON"))
-	//	log.Printf("Testing: Check if '/personJSON' Page Works - %v", PassFail(CheckPageResponse("http://localhost:8080/peopleJSON")))
 	test = Test{
 		Name:   "Check if '/personJSON' Page Works",
 		Status: x,
 	}
 	tests = append(tests, test)
 	x = PassFail(CheckPageResponse("http://localhost:8080/JSON"))
-	//	log.Printf("Testing: Check if '/JSON' Page Works - %v", PassFail(CheckPageResponse("http://localhost:8080/JSON")))
 	test = Test{
 		Name:   "Check if '/JSON' Page Works",
 		Status: x,
 	}
 	tests = append(tests, test)
 	x = PassFail(CheckNoPageResponse("http://localhost:8080/x"))
-	//	log.Printf("Testing: Check for a Page that doesn't Exist - %v", PassFail(CheckNoPageResponse("http://localhost:8080/x")))
 	test = Test{
 		Name:   "Check for a Page that doesn't Exist",
 		Status: x,
 	}
 	tests = append(tests, test)
 	x = PassFail(AddJSONsPOST())
-	//	log.Printf("Testing: Adding Two Random JSON Objects POST - %v", PassFail(AddJSONsPOST()))
 	test = Test{
 		Name:   "Adding Two Random JSON Objects POST",
 		Status: x,
@@ -82,7 +73,7 @@ func runUnitTests() {
 	log.Printf("////////////////////////////////////////////////////////")
 }
 
-//Tests if Default Users Are Added Correctly
+//testUsersAdded Tests if Default Users Are Added Correctly
 func testUsersAdded() bool {
 	if len(people) != 2 {
 		return false
@@ -103,7 +94,7 @@ func testUsersAdded() bool {
 	return true
 }
 
-//Tests if a new user can be added via API POST
+//AddNewUserPOST Tests if a new user can be added via API POST
 func AddNewUserPOST() bool {
 	type Payload struct {
 		First string `json:"first"`
@@ -152,6 +143,7 @@ func AddNewUserPOST() bool {
 	return true
 }
 
+//AddJSONsPOST adds two JSON objects to the JSON array via a POST to /JSON
 func AddJSONsPOST() bool {
 	type Payload struct {
 		One   string `json:"Item1"`
@@ -226,7 +218,7 @@ func AddJSONsPOST() bool {
 	return true
 }
 
-//Tests if the new user can be deleted (Dependency on previous)
+//DeleteUser tests if the new user can be deleted (Dependency on previous)
 func DeleteUser(id int) bool {
 	err := RepoDestroyPerson(3)
 	if err != nil {
@@ -239,6 +231,7 @@ func DeleteUser(id int) bool {
 
 }
 
+//CheckPageResponse checks if a page that should respond is found correctly
 func CheckPageResponse(url string) bool {
 	response, err := http.Get(url)
 	if err != nil {
@@ -253,6 +246,7 @@ func CheckPageResponse(url string) bool {
 	return true
 }
 
+//CheckNoPageResponse checks if a page that does not exist responds with a 404 Error
 func CheckNoPageResponse(url string) bool {
 	response, err := http.Get(url)
 	if err != nil {
@@ -267,7 +261,7 @@ func CheckNoPageResponse(url string) bool {
 	return false
 }
 
-//Returns Pass or Fail
+//PassFail Returns Pass or Fail based on bools
 func PassFail(result bool) string {
 	if result {
 		pass++
