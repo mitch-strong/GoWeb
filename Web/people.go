@@ -13,11 +13,3 @@ type Person struct {
 
 //People is a list of Persons
 type People []Person
-
-type Test struct {
-	Name   string
-	Status string
-}
-
-//People is a list of Persons
-type Tests []Test

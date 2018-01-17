@@ -2,6 +2,7 @@ package main
 
 import "net/http"
 
+//Route object creates to keep track of routes for router
 type Route struct {
 	Name        string
 	Method      string
@@ -9,6 +10,7 @@ type Route struct {
 	HandlerFunc http.HandlerFunc
 }
 
+//Routes is an array of Route objects
 type Routes []Route
 
 var routes = Routes{
@@ -47,11 +49,5 @@ var routes = Routes{
 		"GET",
 		"/JSON",
 		GenericListJSON,
-	},
-	Route{
-		"GetTestResults",
-		"GET",
-		"/tests",
-		GetTestResults,
 	},
 }
