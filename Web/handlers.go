@@ -18,54 +18,18 @@ var oauth2Config oauth2.Config
 var provider *oidc.Provider
 var err error
 var verifier *oidc.IDTokenVerifier
+var token *oauth2.Token
 
 //Index returns when the main page is called and returns HTML indicating the availale paths
-func Index(w http.ResponseWriter, r *http.Request) {
+var indexHandler = http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 	tpl, _ := template.ParseFiles("./templates/index.html")
 	tpl.Execute(w, nil)
 	w.Header().Set("Content-Type", "text/html; charset=utf-8")
 	return
-}
-
-func handleRedirect(w http.ResponseWriter, r *http.Request) {
-	ctx := context.Background()
-	oauth2Token, _ := oauth2Config.Exchange(ctx, r.URL.Query().Get("code"))
-	http.Redirect(w, r, oauth2Config.AuthCodeURL(oauth2Token.AccessToken), http.StatusFound)
-}
-
-func handleOAuth2Callback(w http.ResponseWriter, r *http.Request) {
-	// Verify state and errors
-	ctx := context.Background()
-
-	oauth2Token, err := oauth2Config.Exchange(ctx, r.URL.Query().Get("code"))
-	if err != nil {
-		// handle error
-	}
-
-	// Extract the ID Token from OAuth2 token.
-	rawIDToken, ok := oauth2Token.Extra("id_token").(string)
-	if !ok {
-		// handle missing token
-	}
-
-	// Parse and verify ID Token payload.
-	idToken, err := verifier.Verify(ctx, rawIDToken)
-	if err != nil {
-		// handle error
-	}
-
-	// Extract custom claims
-	var claims struct {
-		Email    string `json:"email"`
-		Verified bool   `json:"email_verified"`
-	}
-	if err := idToken.Claims(&claims); err != nil {
-		// handle error
-	}
-}
+})
 
 //PersonList returns a readable list of people
-func PersonList(w http.ResponseWriter, r *http.Request) {
+var personListHandler = http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "text/html; charset=utf-8")
 	tpl, _ := template.ParseFiles("./templates/people.html")
 
@@ -85,28 +49,28 @@ func PersonList(w http.ResponseWriter, r *http.Request) {
 	err := tpl.Execute(w, data)
 	check(err)
 	return
-}
+})
 
 //PersonListJSON returns a comma seperated list of people as raw JSON
-func PersonListJSON(w http.ResponseWriter, r *http.Request) {
+var personListJSONHandler = http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json; charset=UTF-8")
 	w.WriteHeader(http.StatusOK)
 	if err := json.NewEncoder(w).Encode(people); err != nil {
 		panic(err)
 	}
-}
+})
 
 //GenericListJSON returns a comma seperated list of generic JSON objects stored in objects array
-func GenericListJSON(w http.ResponseWriter, r *http.Request) {
+var genericListJSONHandler = http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json; charset=UTF-8")
 	w.WriteHeader(http.StatusOK)
 	if err := json.NewEncoder(w).Encode(objects); err != nil {
 		panic(err)
 	}
-}
+})
 
 //PersonCreate is a POST method that converts JSON objects into people objects and stores them
-func PersonCreate(w http.ResponseWriter, r *http.Request) {
+var personCreateHandler = http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 	var person Person
 	body, err := ioutil.ReadAll(io.LimitReader(r.Body, 1048576))
 	if err != nil {
@@ -129,10 +93,10 @@ func PersonCreate(w http.ResponseWriter, r *http.Request) {
 	if err := json.NewEncoder(w).Encode(t); err != nil {
 		panic(err)
 	}
-}
+})
 
 //GenericJSON is a POST method that converts JSON objects into empty interface objects and stores them
-func GenericJSON(w http.ResponseWriter, r *http.Request) {
+var genericJSONHandler = http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 	var f interface{}
 	body, err := ioutil.ReadAll(io.LimitReader(r.Body, 1048576))
 	if err != nil {
@@ -170,7 +134,7 @@ func GenericJSON(w http.ResponseWriter, r *http.Request) {
 
 	w.Header().Set("Content-Type", "application/json; charset=UTF-8")
 	w.WriteHeader(http.StatusCreated)
-}
+})
 
 func handleLogin(w http.ResponseWriter, r *http.Request) {
 	url := oauth2Config.AuthCodeURL(oauthStateString)
@@ -182,15 +146,15 @@ func handleLoginCallback(w http.ResponseWriter, r *http.Request) {
 	state := r.FormValue("state")
 	if state != oauthStateString {
 		fmt.Printf("invalid oauth state, expected '%s', got '%s'\n", oauthStateString, state)
-		http.Redirect(w, r, "/", http.StatusTemporaryRedirect)
+		http.Redirect(w, r, "/login", http.StatusTemporaryRedirect)
 		return
 	}
 
 	code := r.FormValue("code")
-	token, err := oauth2Config.Exchange(context.Background(), code)
+	token, err = oauth2Config.Exchange(context.Background(), code)
 	if err != nil {
-		fmt.Println("Code exchange failed with '%s'\n", err)
-		http.Redirect(w, r, "/", http.StatusTemporaryRedirect)
+		fmt.Printf("Code exchange failed with '%v'\n", err)
+		http.Redirect(w, r, "/login", http.StatusTemporaryRedirect)
 		return
 	}
 	client := &http.Client{}
@@ -198,8 +162,45 @@ func handleLoginCallback(w http.ResponseWriter, r *http.Request) {
 	req, _ := http.NewRequest("GET", url, nil)
 	req.Header.Set("Authorization", "Bearer "+token.AccessToken)
 	response, err := client.Do(req)
-	fmt.Printf(response.Status)
-	defer response.Body.Close()
-	contents, err := ioutil.ReadAll(response.Body)
-	fmt.Fprintf(w, "Content: %s\n", contents)
+	if err != nil || response.Status == "401 Unauthorized" {
+		http.Redirect(w, r, "/login", http.StatusTemporaryRedirect)
+	} else {
+		http.Redirect(w, r, "/", http.StatusTemporaryRedirect)
+	}
+	return
 }
+
+func authMiddleware(next http.HandlerFunc) http.HandlerFunc {
+	handler := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		client := &http.Client{}
+		url := "http://localhost:8080/auth/realms/demo/protocol/openid-connect/userinfo"
+		req, _ := http.NewRequest("GET", url, nil)
+		if token == nil {
+			http.Redirect(w, r, "/login", http.StatusTemporaryRedirect)
+			return
+		}
+		req.Header.Set("Authorization", "Bearer "+token.AccessToken)
+		response, err := client.Do(req)
+		if err != nil || response.Status != "200 OK" {
+			http.Redirect(w, r, "/login", http.StatusTemporaryRedirect)
+		} else {
+			next.ServeHTTP(w, r)
+		}
+	})
+
+	return handler
+}
+
+// //Logout logs the user out
+// func Logout(w http.ResponseWriter, r *http.Request) {
+// 	client := &http.Client{}
+// 	url := "http://localhost:8080/auth/realms/demo/protocol/openid-connect/logout"
+// 	req, _ := http.NewRequest("GET", url, nil)
+// 	_, err := client.Do(req)
+// 	if err != nil {
+// 		http.Redirect(w, r, "/logout", http.StatusTemporaryRedirect)
+
+// 	}
+// 	http.Redirect(w, r, "/login", http.StatusTemporaryRedirect)
+// 	return
+// }
