@@ -1,13 +1,23 @@
 package main
 
 import (
+	"context"
 	"encoding/json"
+	"fmt"
 	"html/template"
 	"io"
 	"io/ioutil"
 	"log"
 	"net/http"
+
+	oidc "github.com/coreos/go-oidc"
+	"golang.org/x/oauth2"
 )
+
+var oauth2Config oauth2.Config
+var provider *oidc.Provider
+var err error
+var verifier *oidc.IDTokenVerifier
 
 //Index returns when the main page is called and returns HTML indicating the availale paths
 func Index(w http.ResponseWriter, r *http.Request) {
@@ -15,6 +25,43 @@ func Index(w http.ResponseWriter, r *http.Request) {
 	tpl.Execute(w, nil)
 	w.Header().Set("Content-Type", "text/html; charset=utf-8")
 	return
+}
+
+func handleRedirect(w http.ResponseWriter, r *http.Request) {
+	ctx := context.Background()
+	oauth2Token, _ := oauth2Config.Exchange(ctx, r.URL.Query().Get("code"))
+	http.Redirect(w, r, oauth2Config.AuthCodeURL(oauth2Token.AccessToken), http.StatusFound)
+}
+
+func handleOAuth2Callback(w http.ResponseWriter, r *http.Request) {
+	// Verify state and errors
+	ctx := context.Background()
+
+	oauth2Token, err := oauth2Config.Exchange(ctx, r.URL.Query().Get("code"))
+	if err != nil {
+		// handle error
+	}
+
+	// Extract the ID Token from OAuth2 token.
+	rawIDToken, ok := oauth2Token.Extra("id_token").(string)
+	if !ok {
+		// handle missing token
+	}
+
+	// Parse and verify ID Token payload.
+	idToken, err := verifier.Verify(ctx, rawIDToken)
+	if err != nil {
+		// handle error
+	}
+
+	// Extract custom claims
+	var claims struct {
+		Email    string `json:"email"`
+		Verified bool   `json:"email_verified"`
+	}
+	if err := idToken.Claims(&claims); err != nil {
+		// handle error
+	}
 }
 
 //PersonList returns a readable list of people
@@ -123,4 +170,36 @@ func GenericJSON(w http.ResponseWriter, r *http.Request) {
 
 	w.Header().Set("Content-Type", "application/json; charset=UTF-8")
 	w.WriteHeader(http.StatusCreated)
+}
+
+func handleLogin(w http.ResponseWriter, r *http.Request) {
+	url := oauth2Config.AuthCodeURL(oauthStateString)
+	http.Redirect(w, r, url, http.StatusTemporaryRedirect)
+}
+
+func handleLoginCallback(w http.ResponseWriter, r *http.Request) {
+	fmt.Printf("Made it into the callback")
+	state := r.FormValue("state")
+	if state != oauthStateString {
+		fmt.Printf("invalid oauth state, expected '%s', got '%s'\n", oauthStateString, state)
+		http.Redirect(w, r, "/", http.StatusTemporaryRedirect)
+		return
+	}
+
+	code := r.FormValue("code")
+	token, err := oauth2Config.Exchange(context.Background(), code)
+	if err != nil {
+		fmt.Println("Code exchange failed with '%s'\n", err)
+		http.Redirect(w, r, "/", http.StatusTemporaryRedirect)
+		return
+	}
+	client := &http.Client{}
+	url := "http://localhost:8080/auth/realms/demo/protocol/openid-connect/userinfo"
+	req, _ := http.NewRequest("GET", url, nil)
+	req.Header.Set("Authorization", "Bearer "+token.AccessToken)
+	response, err := client.Do(req)
+	fmt.Printf(response.Status)
+	defer response.Body.Close()
+	contents, err := ioutil.ReadAll(response.Body)
+	fmt.Fprintf(w, "Content: %s\n", contents)
 }

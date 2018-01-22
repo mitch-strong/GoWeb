@@ -50,4 +50,16 @@ var routes = Routes{
 		"/JSON",
 		GenericListJSON,
 	},
+	Route{
+		"handleLogin",
+		"GET",
+		"/login",
+		handleLogin,
+	},
+	Route{
+		"handleLoginCallback",
+		"GET",
+		"/loginCallback",
+		handleLoginCallback,
+	},
 }
