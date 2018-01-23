@@ -10,6 +10,7 @@ import (
 	"golang.org/x/oauth2"
 )
 
+//Constants for server information and cleint information
 const localhost = "localhost"
 const localport = "3000"
 const keycloakhost = "localhost"
@@ -20,12 +21,13 @@ const realm = "demo"
 const clientID = "mitchell"
 const clientSecret = "6147e7de-67b9-423f-a0a5-4b79ef86e7cb"
 
-var goTest bool
-var oauthStateString = "random"
+var goTest bool // true if unit tests are running
+var letters = []rune("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ")
+var oauthStateString string
 
 func main() {
-
 	ctx := context.Background()
+	//Gets the provider for authentication (keycloak)
 	provider, err = oidc.NewProvider(ctx, keycloakserver+"/auth/realms/"+realm)
 	if err != nil {
 		fmt.Printf("This is an error with regard to the context: %v", err)
@@ -41,10 +43,10 @@ func main() {
 		// Discovery returns the OAuth2 endpoints.
 		Endpoint: provider.Endpoint(),
 
-		// "openid" is a required scope for OpenID Connect flows.
 		Scopes: []string{oidc.ScopeOpenID, "profile", "email"},
 	}
 
 	router := NewRouter()
+	//Stats hosing on the constant port
 	log.Fatal(http.ListenAndServe(":"+localport, router))
 }

@@ -9,14 +9,14 @@ Simple Golang Web Server
 ```
 ## Docker 
 ```
-4. docker run -it --name=GoWeb -p 8080:8080 -v $HOME/go/src/github.com/mitch-strong/GoWeb/Web  $(docker images -q goweb)
+4. docker run -it --name=GoWeb -p 3000:3000 -v $HOME/go/src/github.com/mitch-strong/GoWeb/Web  $(docker images -q goweb)
 ```
 ## Minikube
 ```
 4. minikube start
 5. kubectl config use-context minikube
 6. minikube dashboard
-7. kubectl run goweb --image=goweb:latest --port=8080 
+7. kubectl run goweb --image=goweb:latest --port=3000 
 8. kubectl expose deployment goweb --type=LoadBalancer
 9. minikube service goweb
 ```
