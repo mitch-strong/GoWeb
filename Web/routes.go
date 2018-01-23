@@ -62,10 +62,10 @@ var routes = Routes{
 		"/loginCallback",
 		handleLoginCallback,
 	},
-	// 	Route{
-	// 		"logout",
-	// 		"GET",
-	// 		"/logout",
-	// 		Logout,
-	// 	},
+	Route{
+		"logout",
+		"GET",
+		"/logout",
+		Logout,
+	},
 }

@@ -142,7 +142,6 @@ func handleLogin(w http.ResponseWriter, r *http.Request) {
 }
 
 func handleLoginCallback(w http.ResponseWriter, r *http.Request) {
-	fmt.Printf("Made it into the callback")
 	state := r.FormValue("state")
 	if state != oauthStateString {
 		fmt.Printf("invalid oauth state, expected '%s', got '%s'\n", oauthStateString, state)
@@ -158,7 +157,7 @@ func handleLoginCallback(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	client := &http.Client{}
-	url := "http://localhost:8080/auth/realms/demo/protocol/openid-connect/userinfo"
+	url := keycloakserver + "/auth/realms/" + realm + "/protocol/openid-connect/userinfo"
 	req, _ := http.NewRequest("GET", url, nil)
 	req.Header.Set("Authorization", "Bearer "+token.AccessToken)
 	response, err := client.Do(req)
@@ -172,8 +171,11 @@ func handleLoginCallback(w http.ResponseWriter, r *http.Request) {
 
 func authMiddleware(next http.HandlerFunc) http.HandlerFunc {
 	handler := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if goTest {
+			next.ServeHTTP(w, r)
+		}
 		client := &http.Client{}
-		url := "http://localhost:8080/auth/realms/demo/protocol/openid-connect/userinfo"
+		url := keycloakserver + "/auth/realms/" + realm + "/protocol/openid-connect/userinfo"
 		req, _ := http.NewRequest("GET", url, nil)
 		if token == nil {
 			http.Redirect(w, r, "/login", http.StatusTemporaryRedirect)
@@ -191,16 +193,9 @@ func authMiddleware(next http.HandlerFunc) http.HandlerFunc {
 	return handler
 }
 
-// //Logout logs the user out
-// func Logout(w http.ResponseWriter, r *http.Request) {
-// 	client := &http.Client{}
-// 	url := "http://localhost:8080/auth/realms/demo/protocol/openid-connect/logout"
-// 	req, _ := http.NewRequest("GET", url, nil)
-// 	_, err := client.Do(req)
-// 	if err != nil {
-// 		http.Redirect(w, r, "/logout", http.StatusTemporaryRedirect)
+//Logout logs the user out
+func Logout(w http.ResponseWriter, r *http.Request) {
+	URI := server + "/login"
+	http.Redirect(w, r, keycloakserver+"/auth/realms/"+realm+"/protocol/openid-connect/logout?redirect_uri="+URI, http.StatusTemporaryRedirect)
 
-// 	}
-// 	http.Redirect(w, r, "/login", http.StatusTemporaryRedirect)
-// 	return
-// }
+}
