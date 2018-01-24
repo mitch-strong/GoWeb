@@ -4,12 +4,12 @@ Simple Golang Web Server
 ## How To Install and Run
 ```
 1. go get -u github.com/mitch-strong/GoWeb/Web
-2. cd $HOME/go/src/github.com/mitch-strong/GoWeb
+2. cd $GOPATH/go/src/github.com/mitch-strong/GoWeb
 3. docker build -t goweb ./
 ```
 ## Docker 
 ```
-4. docker run -it --name=GoWeb -p 8080:8080 -v $HOME/go/src/github.com/mitch-strong/GoWeb/Web  $(docker images -q goweb)
+4. docker run -d --name=GoWeb -p 8080:8080 -v $GOPATH/go/src/github.com/mitch-strong/GoWeb/Web  $(docker images -q goweb)
 ```
 ## Minikube
 ```
