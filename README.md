@@ -15,7 +15,7 @@ docker run -p 8080:8080 -name=keycloak -d -e KEYCLOAK_USER=admin -e KEYCLOAK_PAS
 1. Create a Client
 2. Create a user in this realm
 3. Edit allowed redirect URLS
-4. Edit Constands in main.go and rebuild docker image
+4. Edit constants in main.go and rebuild docker image
 
 ## Docker 
 ```
