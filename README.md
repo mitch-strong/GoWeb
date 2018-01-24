@@ -7,6 +7,16 @@ go get -u github.com/mitch-strong/GoWeb/Web
 cd $HOME/go/src/github.com/mitch-strong/GoWeb
 docker build -t goweb ./
 ```
+
+###Keycloak
+```
+docker run -p 8080:8080 -name=keycloak -d -e KEYCLOAK_USER=admin -e KEYCLOAK_PASSWORD=admin jboss/keycloak-examples
+```
+1. Create a Client
+2. Create a user in this realm
+3. Edit allowed redirect URLS
+4. Edit Constands in main.go and rebuild docker image
+
 ## Docker 
 ```
 docker run -it --name=GoWeb --link keycloak -p 3000:3000 -v $HOME/go/src/github.com/mitch-strong/GoWeb/Web  $(docker images -q goweb)
