@@ -50,4 +50,9 @@ minikube dashboard
 kubectl run goweb --image=docker.io/mitchellstrong/goweb:latest --port=3000 
 kubectl expose deployment goweb --type=LoadBalancer
 minikube service goweb
+kubectl scale deployments/goweb --replicas=4
+```
+Port Forwarding
+```
+ssh -L localhost:8080:192.168.99.100:30220 -N 127.0.0.1
 ```
