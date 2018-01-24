@@ -13,7 +13,7 @@ import (
 //Constants for server information and cleint information
 const localhost = "localhost"
 const localport = "3000"
-const keycloakhost = "localhost"
+const keycloakhost = "keycloak"
 const keycloakport = "8080"
 const server = "http://" + localhost + ":" + localport
 const keycloakserver = "http://" + keycloakhost + ":" + keycloakport

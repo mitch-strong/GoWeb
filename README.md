@@ -3,22 +3,25 @@ Simple Golang Web Server
 
 ## How To Install and Run
 ```
-1. go get -u github.com/mitch-strong/GoWeb/Web
-2. cd $HOME/go/src/github.com/mitch-strong/GoWeb
-3. docker build -t goweb ./
+go get -u github.com/mitch-strong/GoWeb/Web
+cd $HOME/go/src/github.com/mitch-strong/GoWeb
+docker build -t goweb ./
 ```
 ## Docker 
 ```
-4. docker run -it --name=GoWeb -p 3000:3000 -v $HOME/go/src/github.com/mitch-strong/GoWeb/Web  $(docker images -q goweb)
+docker run -it --name=GoWeb --link keycloak -p 3000:3000 -v $HOME/go/src/github.com/mitch-strong/GoWeb/Web  $(docker images -q goweb)
 ```
+
+NOTE:  When connecting to keycloak the main.go file constants will have to be changed to match the client id and secret of the keycloak client created.  Keycloak must be hosted on port 8080
+
 ## Minikube
 ```
-4. minikube start
-5. kubectl config use-context minikube
-6. minikube dashboard
-7. kubectl run goweb --image=goweb:latest --port=3000 
-8. kubectl expose deployment goweb --type=LoadBalancer
-9. minikube service goweb
+minikube start
+kubectl config use-context minikube
+minikube dashboard
+kubectl run goweb --image=goweb:latest --port=3000 
+kubectl expose deployment goweb --type=LoadBalancer
+minikube service goweb
 ```
 ```
 rm -rf ~/.minikube  //Run this if minikube starts with error
@@ -31,10 +34,10 @@ docker push mitchellstrong/goweb:latest
 ```
 ## Minikube Docker Repo
 ```
-4. minikube start
-5. kubectl config use-context minikube
-6. minikube dashboard
-7. kubectl run goweb --image=docker.io/mitchellstrong/goweb:latest --port=8080 
-8. kubectl expose deployment goweb --type=LoadBalancer
-9. minikube service goweb
+minikube start
+kubectl config use-context minikube
+minikube dashboard
+kubectl run goweb --image=docker.io/mitchellstrong/goweb:latest --port=3000 
+kubectl expose deployment goweb --type=LoadBalancer
+minikube service goweb
 ```
