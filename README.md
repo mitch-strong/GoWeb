@@ -8,7 +8,7 @@ cd $HOME/go/src/github.com/mitch-strong/GoWeb
 docker build -t goweb ./
 ```
 
-##Keycloak
+### Keycloak
 ```
 docker run -p 8080:8080 -name=keycloak -d -e KEYCLOAK_USER=admin -e KEYCLOAK_PASSWORD=admin jboss/keycloak-examples
 ```
