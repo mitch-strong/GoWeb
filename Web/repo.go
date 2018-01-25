@@ -5,13 +5,13 @@ import (
 	"time"
 )
 
-var currentId int
+var currentID int
 
+//Objects is an array of empty interfaces
 type Objects []interface{}
 
 var people People
 var objects Objects
-var tests Tests
 
 // Create Some Default People At Init
 func init() {
@@ -19,6 +19,7 @@ func init() {
 	RepoCreatePerson(Person{FirstName: "Richard", LastName: "de Borja", IsUHN: true})
 }
 
+//RepoFindPerson Finds a person in the people array based on ID
 func RepoFindPerson(id int) Person {
 	for _, t := range people {
 		if t.ID == id {
@@ -29,14 +30,16 @@ func RepoFindPerson(id int) Person {
 	return Person{}
 }
 
+//RepoCreatePerson Adds a person to the people Array
 func RepoCreatePerson(t Person) Person {
-	currentId++
-	t.ID = currentId
+	currentID++
+	t.ID = currentID
 	t.AddedOn = time.Now()
 	people = append(people, t)
 	return t
 }
 
+//RepoDestroyPerson Removes a person from the people array based on ID
 func RepoDestroyPerson(id int) error {
 	for i, t := range people {
 		if t.ID == id {

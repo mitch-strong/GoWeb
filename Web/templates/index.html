@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+	<html>
+	<head>
+		<meta charset="UTF-8">
+        <title>GoWeb</title>
+        <link rel="stylesheet" type="text/css" href="static/css/style.css">
+	</head>
+	<body>
+		<h1>Welcome to GoWeb!</h1>
+		<p>Please Note the Following Pages to Access</p>
+		<ul>
+			<li>GET --> "/" | Home Page</li>
+			<li>GET --> "/peopleJSON" | Shows list of people as JSON strings</li>
+			<li>GET --> "/people" | Shows list of people readable table</li>
+			<li>GET --> "/JSON" | Shows list of JSON objects as JSON strings</li>
+			<li>POST --> "/people" | Creates a new person and adds them to the list
+			<ul><li>"first" - string</li><li>"last" - string</li><li>"UHN" - bool</li></ul></li>
+			<li>POST --> "/JSON" | Creates a new generic JSON object and adds it to the list
+			<ul><li>"Any parameters are valid in proper JSON format"</li></ul></li>
+		</ul>
+	</body>
+	</html>

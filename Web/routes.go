@@ -2,6 +2,7 @@ package main
 
 import "net/http"
 
+//Route object creates to keep track of routes for router
 type Route struct {
 	Name        string
 	Method      string
@@ -9,49 +10,80 @@ type Route struct {
 	HandlerFunc http.HandlerFunc
 }
 
+//Routes is an array of Route objects
 type Routes []Route
 
 var routes = Routes{
+	//Home page
+	///Authenticated
 	Route{
 		"Index",
 		"GET",
 		"/",
-		Index,
+		authMiddleware(indexHandler),
 	},
+	//HTML list of people
+	///Authenticated
 	Route{
 		"PersonList",
 		"GET",
 		"/people",
-		PersonList,
+		authMiddleware(personListHandler),
 	},
+	//JSON list of people
+	///Authenticated
 	Route{
 		"PersonListJSON",
 		"GET",
 		"/peopleJSON",
-		PersonListJSON,
+		authMiddleware(personListJSONHandler),
 	},
+	//Create new peoson POST
+	///Authenticated
 	Route{
 		"PersonCreate",
 		"POST",
 		"/people",
-		PersonCreate,
+		authMiddleware(personCreateHandler),
 	},
+	//Create new generic JSON object
+	///Authenticated
 	Route{
 		"GenericJSON",
 		"POST",
 		"/JSON",
-		GenericJSON,
+		authMiddleware(genericJSONHandler),
 	},
+	//List of JSON objects
+	///Authenticated
 	Route{
 		"GenericListJSON",
 		"GET",
 		"/JSON",
-		GenericListJSON,
+		authMiddleware(genericListJSONHandler),
 	},
+	//Login page
+	///Unauthenticated
 	Route{
-		"GetTestResults",
+		"handleLogin",
 		"GET",
-		"/tests",
-		GetTestResults,
+		"/login",
+		handleLogin,
+	},
+	//Login helper
+	//Authenticated
+	Route{
+		"handleLoginCallback",
+		"GET",
+		"/loginCallback",
+		handleLoginCallback,
+	},
+	//Logout helper, redirects to login
+	///Unauthenticatec
+	Route{
+		"logout",
+		"GET",
+		"/logout",
+		Logout,
 	},
 }
