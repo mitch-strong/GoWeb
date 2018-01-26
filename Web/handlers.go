@@ -1,26 +1,18 @@
 package main
 
 import (
-	"context"
 	"encoding/json"
-	"fmt"
 	"html/template"
 	"io"
 	"io/ioutil"
 	"log"
-	"math/rand"
 	"net/http"
 
-	oidc "github.com/coreos/go-oidc"
-	"golang.org/x/oauth2"
+	keycloak "github.com/mitch-strong/keycloakgo"
 )
 
 //Global vairable definitions
-var oauth2Config oauth2.Config
-var provider *oidc.Provider
 var err error
-var verifier *oidc.IDTokenVerifier
-var token *oauth2.Token
 
 //Index returns when the main page is called and returns HTML indicating the availale paths
 var indexHandler = http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
@@ -124,92 +116,22 @@ var genericJSONHandler = http.HandlerFunc(func(w http.ResponseWriter, r *http.Re
 
 //handleLogin is the login function, redirects to the loginCallback function
 func handleLogin(w http.ResponseWriter, r *http.Request) {
-	//create a random string for oath2 verification
-	oauthStateString = randSeq(20)
-	//Uses random gnerated string to verify keyclock security
-	url := oauth2Config.AuthCodeURL(oauthStateString)
-	//redirects to loginCallback
-	http.Redirect(w, r, url, http.StatusTemporaryRedirect)
+	keycloak.HandleLogin(w, r)
+	return
 }
 
 //handleLoginCallback is a fuction that verifies login success and forwards to index
 func handleLoginCallback(w http.ResponseWriter, r *http.Request) {
-	state := r.FormValue("state")
-	//Checks that the strings are in a consistent state
-	if state != oauthStateString {
-		fmt.Printf("invalid oauth state, expected '%s', got '%s'\n", oauthStateString, state)
-		http.Redirect(w, r, "/login", http.StatusTemporaryRedirect)
-		return
-	}
-	//Gets the code from keycloak
-	code := r.FormValue("code")
-	//Exchanges code for token
-	token, err = oauth2Config.Exchange(context.Background(), code)
-	if err != nil {
-		fmt.Printf("Code exchange failed with '%v'\n", err)
-		http.Redirect(w, r, "/login", http.StatusTemporaryRedirect)
-		return
-	}
-	client := &http.Client{}
-	url := keycloakserver + "/auth/realms/" + realm + "/protocol/openid-connect/userinfo"
-	req, _ := http.NewRequest("GET", url, nil)
-	req.Header.Set("Authorization", "Bearer "+token.AccessToken)
-	//Sends the token to get user info
-	response, err := client.Do(req)
-	//Checks if token and authentication were successful
-	if err != nil || response.Status == "401 Unauthorized" {
-		//forwards back to login if not successful
-		http.Redirect(w, r, "/login", http.StatusTemporaryRedirect)
-	} else {
-		//forwards to index if login sucessful
-		http.Redirect(w, r, "/", http.StatusTemporaryRedirect)
-	}
+	keycloak.HandleLoginCallback(w, r)
 	return
 }
 
 //authMiddleware is a middlefuntion that verifies authentication before each redirect
 func authMiddleware(next http.HandlerFunc) http.HandlerFunc {
-	handler := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		//If running unit tests skip authentication (temp)
-		if goTest {
-			next.ServeHTTP(w, r)
-		}
-		client := &http.Client{}
-		url := keycloakserver + "/auth/realms/" + realm + "/protocol/openid-connect/userinfo"
-		req, _ := http.NewRequest("GET", url, nil)
-		if token == nil {
-			http.Redirect(w, r, "/login", http.StatusTemporaryRedirect)
-			return
-		}
-		req.Header.Set("Authorization", "Bearer "+token.AccessToken)
-		//Check if token is still valid
-		response, err := client.Do(req)
-		if err != nil || response.Status != "200 OK" {
-			//Go to login if token is no longer valid
-			http.Redirect(w, r, "/login", http.StatusTemporaryRedirect)
-		} else {
-			//Go to redirect if token is still valid
-			next.ServeHTTP(w, r)
-		}
-	})
-	//return function for page handling
-	return handler
+	return keycloak.AuthMiddleware(next)
 }
 
-//Logout logs the user out
-func Logout(w http.ResponseWriter, r *http.Request) {
-	//Makes the logout page redirect to login page
-	URI := server + "/login"
-	//Logout using endpoint and redirect to login page
-	http.Redirect(w, r, keycloakserver+"/auth/realms/"+realm+"/protocol/openid-connect/logout?redirect_uri="+URI, http.StatusTemporaryRedirect)
-
-}
-
-//randSeq generates a random string of letters of the given length (Helper function)
-func randSeq(n int) string {
-	b := make([]rune, n)
-	for i := range b {
-		b[i] = letters[rand.Intn(len(letters))]
-	}
-	return string(b)
+//logout logs the user out
+func logout(w http.ResponseWriter, r *http.Request) {
+	keycloak.Logout(w, r)
 }

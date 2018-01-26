@@ -78,12 +78,12 @@ var routes = Routes{
 		"/loginCallback",
 		handleLoginCallback,
 	},
-	//Logout helper, redirects to login
+	//Logout, redirects to login
 	///Unauthenticatec
 	Route{
 		"logout",
 		"GET",
 		"/logout",
-		Logout,
+		logout,
 	},
 }
