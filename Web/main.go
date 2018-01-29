@@ -31,7 +31,7 @@ func main() {
 	addKeycloak(keycloakserver, server)
 
 	router := NewRouter()
-	//Stats hosing on the constant port
+	//Stats hosting on the constant port
 	log.Fatal(http.ListenAndServe(":"+localport, router))
 }
 

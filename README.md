@@ -4,7 +4,7 @@ Simple Golang Web Server
 ## How To Install and Run
 ```
 go get -u github.com/mitch-strong/GoWeb/Web
-cd $HOME/go/src/github.com/mitch-strong/GoWeb
+cd $GOPATH/src/github.com/mitch-strong/GoWeb
 docker build -t goweb ./
 ```
 
@@ -19,7 +19,7 @@ docker run -p 8080:8080 -name=keycloak -d -e KEYCLOAK_USER=admin -e KEYCLOAK_PAS
 
 ## Docker 
 ```
-docker run -it --name=GoWeb --link keycloak -p 3000:3000 -v $HOME/go/src/github.com/mitch-strong/GoWeb/Web  $(docker images -q goweb)
+docker run -d --name=GoWeb --link keycloak -p 3000:3000 -v $HOME/go/src/github.com/mitch-strong/GoWeb/Web  $(docker images -q goweb)
 ```
 
 NOTE:  When connecting to keycloak the main.go file constants will have to be changed to match the client id and secret of the keycloak client created.  Keycloak must be hosted on port 8080
