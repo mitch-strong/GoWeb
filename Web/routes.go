@@ -20,7 +20,8 @@ var routes = Routes{
 		"Index",
 		"GET",
 		"/",
-		authMiddleware(indexHandler),
+		//authMiddleware(indexHandler),
+		indexHandler,
 	},
 	//HTML list of people
 	///Authenticated
