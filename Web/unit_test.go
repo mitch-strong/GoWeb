@@ -9,10 +9,11 @@ import (
 	"time"
 )
 
+//Currently all authentication is skipped during unit testing
 func TestMain(m *testing.M) {
 	goTest = true
 	router := NewRouter()
-	go http.ListenAndServe(":8080", router)
+	go http.ListenAndServe(":"+localport, router)
 	os.Exit(m.Run())
 }
 
@@ -58,8 +59,9 @@ func TestAddNewUserPOST(t *testing.T) {
 		return
 	}
 	body := bytes.NewReader(payloadBytes)
-
-	req, err := http.NewRequest("POST", "http://localhost:8080/people", body)
+	test := server + "/people"
+	_ = test
+	req, err := http.NewRequest("POST", server+"/people", body)
 	if err != nil {
 		t.Fail()
 		return
@@ -140,8 +142,8 @@ func TestAddJSONsPOST(t *testing.T) {
 	body := bytes.NewReader(payloadBytes)
 	body2 := bytes.NewReader(payloadBytes2)
 
-	req, err := http.NewRequest("POST", "http://localhost:8080/JSON", body)
-	req2, err2 := http.NewRequest("POST", "http://localhost:8080/JSON", body2)
+	req, err := http.NewRequest("POST", server+"/JSON", body)
+	req2, err2 := http.NewRequest("POST", server+"/JSON", body2)
 
 	if err != nil {
 		t.Fail()
@@ -176,11 +178,11 @@ func TestAddJSONsPOST(t *testing.T) {
 
 func TestUrls(t *testing.T) {
 	result := true
-	result = result && CheckPageResponse("http://localhost:8080/")
-	result = result && CheckPageResponse("http://localhost:8080/people")
-	result = result && CheckPageResponse("http://localhost:8080/peopleJSON")
-	result = result && CheckPageResponse("http://localhost:8080/JSON")
-	result = result && CheckNoPageResponse("http://localhost:8080/x")
+	result = result && CheckPageResponse(server+"/")
+	result = result && CheckPageResponse(server+"/people")
+	result = result && CheckPageResponse(server+"/peopleJSON")
+	result = result && CheckPageResponse(server+"/JSON")
+	result = result && CheckNoPageResponse(server+"/x")
 
 	if result != true {
 		t.Fail()

@@ -3,22 +3,35 @@ Simple Golang Web Server
 
 ## How To Install and Run
 ```
-1. go get -u github.com/mitch-strong/GoWeb/Web
-2. cd $HOME/go/src/github.com/mitch-strong/GoWeb
-3. docker build -t goweb ./
+go get -u github.com/mitch-strong/GoWeb/Web
+cd $GOPATH/src/github.com/mitch-strong/GoWeb
+docker build -t goweb ./
 ```
+
+### Keycloak
+```
+docker run -p 8080:8080 -name=keycloak -d -e KEYCLOAK_USER=admin -e KEYCLOAK_PASSWORD=admin jboss/keycloak-examples
+```
+1. Create a Client
+2. Create a user in this realm
+3. Edit allowed redirect URLS
+4. Edit constants in main.go and rebuild docker image
+
 ## Docker 
 ```
-4. docker run -it --name=GoWeb -p 8080:8080 -v $HOME/go/src/github.com/mitch-strong/GoWeb/Web  $(docker images -q goweb)
+docker run -d --name=GoWeb --link keycloak -p 3000:3000 -v $HOME/go/src/github.com/mitch-strong/GoWeb/Web  $(docker images -q goweb)
 ```
+
+NOTE:  When connecting to keycloak the main.go file constants will have to be changed to match the client id and secret of the keycloak client created.  Keycloak must be hosted on port 8080
+
 ## Minikube
 ```
-4. minikube start
-5. kubectl config use-context minikube
-6. minikube dashboard
-7. kubectl run goweb --image=goweb:latest --port=8080 
-8. kubectl expose deployment goweb --type=LoadBalancer
-9. minikube service goweb
+minikube start
+kubectl config use-context minikube
+minikube dashboard
+kubectl run goweb --image=goweb:latest --port=3000 
+kubectl expose deployment goweb --type=LoadBalancer
+minikube service goweb
 ```
 ```
 rm -rf ~/.minikube  //Run this if minikube starts with error
@@ -31,10 +44,15 @@ docker push mitchellstrong/goweb:latest
 ```
 ## Minikube Docker Repo
 ```
-4. minikube start
-5. kubectl config use-context minikube
-6. minikube dashboard
-7. kubectl run goweb --image=docker.io/mitchellstrong/goweb:latest --port=8080 
-8. kubectl expose deployment goweb --type=LoadBalancer
-9. minikube service goweb
+minikube start
+kubectl config use-context minikube
+minikube dashboard
+kubectl run goweb --image=docker.io/mitchellstrong/goweb:latest --port=3000 
+kubectl expose deployment goweb --type=LoadBalancer
+minikube service goweb
+kubectl scale deployments/goweb --replicas=4
+```
+Port Forwarding
+```
+ssh -L localhost:8080:192.168.99.100:30220 -N 127.0.0.1
 ```

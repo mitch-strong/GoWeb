@@ -7,18 +7,23 @@ import (
 	"io/ioutil"
 	"log"
 	"net/http"
+
+	keycloak "github.com/mitch-strong/keycloakgo"
 )
 
+//Global vairable definitions
+var err error
+
 //Index returns when the main page is called and returns HTML indicating the availale paths
-func Index(w http.ResponseWriter, r *http.Request) {
+var indexHandler = http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 	tpl, _ := template.ParseFiles("./templates/index.html")
 	tpl.Execute(w, nil)
 	w.Header().Set("Content-Type", "text/html; charset=utf-8")
 	return
-}
+})
 
 //PersonList returns a readable list of people
-func PersonList(w http.ResponseWriter, r *http.Request) {
+var personListHandler = http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "text/html; charset=utf-8")
 	tpl, _ := template.ParseFiles("./templates/people.html")
 
@@ -38,28 +43,28 @@ func PersonList(w http.ResponseWriter, r *http.Request) {
 	err := tpl.Execute(w, data)
 	check(err)
 	return
-}
+})
 
 //PersonListJSON returns a comma seperated list of people as raw JSON
-func PersonListJSON(w http.ResponseWriter, r *http.Request) {
+var personListJSONHandler = http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json; charset=UTF-8")
 	w.WriteHeader(http.StatusOK)
 	if err := json.NewEncoder(w).Encode(people); err != nil {
 		panic(err)
 	}
-}
+})
 
 //GenericListJSON returns a comma seperated list of generic JSON objects stored in objects array
-func GenericListJSON(w http.ResponseWriter, r *http.Request) {
+var genericListJSONHandler = http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json; charset=UTF-8")
 	w.WriteHeader(http.StatusOK)
 	if err := json.NewEncoder(w).Encode(objects); err != nil {
 		panic(err)
 	}
-}
+})
 
 //PersonCreate is a POST method that converts JSON objects into people objects and stores them
-func PersonCreate(w http.ResponseWriter, r *http.Request) {
+var personCreateHandler = http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 	var person Person
 	body, err := ioutil.ReadAll(io.LimitReader(r.Body, 1048576))
 	if err != nil {
@@ -82,10 +87,10 @@ func PersonCreate(w http.ResponseWriter, r *http.Request) {
 	if err := json.NewEncoder(w).Encode(t); err != nil {
 		panic(err)
 	}
-}
+})
 
 //GenericJSON is a POST method that converts JSON objects into empty interface objects and stores them
-func GenericJSON(w http.ResponseWriter, r *http.Request) {
+var genericJSONHandler = http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 	var f interface{}
 	body, err := ioutil.ReadAll(io.LimitReader(r.Body, 1048576))
 	if err != nil {
@@ -105,22 +110,28 @@ func GenericJSON(w http.ResponseWriter, r *http.Request) {
 	m := f.(map[string]interface{})
 	objects = append(objects, m)
 
-	// for k, v := range m {
-	// 	switch vv := v.(type) {
-	// 	case string:
-	// 		fmt.Println(k, "is string", vv)
-	// 	case float64:
-	// 		fmt.Println(k, "is float64", vv)
-	// 	case []interface{}:
-	// 		fmt.Println(k, "is an array:")
-	// 		for i, u := range vv {
-	// 			fmt.Println(i, u)
-	// 		}
-	// 	default:
-	// 		fmt.Println(k, "is of a type I don't know how to handle")
-	// 	}
-	// }
-
 	w.Header().Set("Content-Type", "application/json; charset=UTF-8")
 	w.WriteHeader(http.StatusCreated)
+})
+
+//handleLogin is the login function, redirects to the loginCallback function
+func handleLogin(w http.ResponseWriter, r *http.Request) {
+	keycloak.HandleLogin(w, r)
+	return
+}
+
+//handleLoginCallback is a fuction that verifies login success and forwards to index
+func handleLoginCallback(w http.ResponseWriter, r *http.Request) {
+	keycloak.HandleLoginCallback(w, r)
+	return
+}
+
+//authMiddleware is a middlefuntion that verifies authentication before each redirect
+func authMiddleware(next http.HandlerFunc) http.HandlerFunc {
+	return keycloak.AuthMiddleware(next)
+}
+
+//logout logs the user out
+func logout(w http.ResponseWriter, r *http.Request) {
+	keycloak.Logout(w, r)
 }

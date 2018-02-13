@@ -1,0 +1,9 @@
+*.code-workspace
+.DS_Store
+*.log
+.vscode
+Web/.vscode
+Web/.DS_Store
+Web/Web
+Web/debug
+Web/debug.test
